@@ -442,6 +442,16 @@ loadScripts(document, 'script');</script>
 <div class="block">Producer that produces decimal values from a <a href="org.apache.arrow.vector/org/apache/arrow/vector/Decimal256Vector.html" title="class in org.apache.arrow.vector"><code>Decimal256Vector</code></a>, writes data to an Avro
  encoder.</div>
 </div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="org.apache.arrow.adapter.avro/org/apache/arrow/adapter/avro/producers/logical/AvroDecimal32Producer.html" title="class in org.apache.arrow.adapter.avro.producers.logical">AvroDecimal32Producer</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Producer that produces decimal values from a <a href="org.apache.arrow.vector/org/apache/arrow/vector/Decimal32Vector.html" title="class in org.apache.arrow.vector"><code>Decimal32Vector</code></a>, writes data to an Avro
+ encoder.</div>
+</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="org.apache.arrow.adapter.avro/org/apache/arrow/adapter/avro/producers/logical/AvroDecimal64Producer.html" title="class in org.apache.arrow.adapter.avro.producers.logical">AvroDecimal64Producer</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Producer that produces decimal values from a <a href="org.apache.arrow.vector/org/apache/arrow/vector/Decimal64Vector.html" title="class in org.apache.arrow.vector"><code>Decimal64Vector</code></a>, writes data to an Avro
+ encoder.</div>
+</div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="org.apache.arrow.adapter.avro/org/apache/arrow/adapter/avro/consumers/logical/AvroDecimalConsumer.html" title="class in org.apache.arrow.adapter.avro.consumers.logical">AvroDecimalConsumer</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Consumer which consume decimal type values from avro decoder.</div>
@@ -1375,32 +1385,40 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="org.apache.arrow.vector/org/apache/arrow/vector/complex/impl/Decimal256WriterImpl.html" title="class in org.apache.arrow.vector.complex.impl">Decimal256WriterImpl</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="org.apache.arrow.adapter.jdbc/org/apache/arrow/adapter/jdbc/consumer/Decimal32Consumer.html" title="class in org.apache.arrow.adapter.jdbc.consumer">Decimal32Consumer</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="org.apache.arrow.adapter.jdbc/org/apache/arrow/adapter/jdbc/binder/Decimal32Binder.html" title="class in org.apache.arrow.adapter.jdbc.binder">Decimal32Binder</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="block">A binder for 32-bit decimals.</div>
+</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="org.apache.arrow.adapter.jdbc/org/apache/arrow/adapter/jdbc/consumer/Decimal32Consumer.html" title="class in org.apache.arrow.adapter.jdbc.consumer">Decimal32Consumer</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Consumer which consume decimal type values from <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.sql/java/sql/ResultSet.html" title="class or interface in java.sql" class="external-link"><code>ResultSet</code></a>.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="org.apache.arrow.vector/org/apache/arrow/vector/holders/Decimal32Holder.html" title="class in org.apache.arrow.vector.holders">Decimal32Holder</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="org.apache.arrow.vector/org/apache/arrow/vector/holders/Decimal32Holder.html" title="class in org.apache.arrow.vector.holders">Decimal32Holder</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Source code generated using FreeMarker template ValueHolders.java</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="org.apache.arrow.vector/org/apache/arrow/vector/complex/impl/Decimal32HolderReaderImpl.html" title="class in org.apache.arrow.vector.complex.impl">Decimal32HolderReaderImpl</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="org.apache.arrow.vector/org/apache/arrow/vector/complex/reader/Decimal32Reader.html" title="interface in org.apache.arrow.vector.complex.reader">Decimal32Reader</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="org.apache.arrow.vector/org/apache/arrow/vector/complex/impl/Decimal32HolderReaderImpl.html" title="class in org.apache.arrow.vector.complex.impl">Decimal32HolderReaderImpl</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="org.apache.arrow.vector/org/apache/arrow/vector/complex/reader/Decimal32Reader.html" title="interface in org.apache.arrow.vector.complex.reader">Decimal32Reader</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
 <div class="block">Source code generated using FreeMarker template ComplexReaders.java</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="org.apache.arrow.vector/org/apache/arrow/vector/complex/impl/Decimal32ReaderImpl.html" title="class in org.apache.arrow.vector.complex.impl">Decimal32ReaderImpl</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
-<div class="block">Source code generated using FreeMarker template ComplexReaders.java</div>
-</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="org.apache.arrow.vector/org/apache/arrow/vector/Decimal32Vector.html" title="class in org.apache.arrow.vector">Decimal32Vector</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="org.apache.arrow.vector/org/apache/arrow/vector/complex/impl/Decimal32ReaderImpl.html" title="class in org.apache.arrow.vector.complex.impl">Decimal32ReaderImpl</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Source code generated using FreeMarker template ComplexReaders.java</div>
+</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="org.apache.arrow.vector/org/apache/arrow/vector/Decimal32Vector.html" title="class in org.apache.arrow.vector">Decimal32Vector</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Decimal32Vector implements a fixed width vector (4 bytes) of decimal values which could be null.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="org.apache.arrow.vector/org/apache/arrow/vector/complex/writer/Decimal32Writer.html" title="interface in org.apache.arrow.vector.complex.writer">Decimal32Writer</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="org.apache.arrow.vector/org/apache/arrow/vector/complex/impl/Decimal32WriterImpl.html" title="class in org.apache.arrow.vector.complex.impl">Decimal32WriterImpl</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="org.apache.arrow.vector/org/apache/arrow/vector/complex/writer/Decimal32Writer.html" title="interface in org.apache.arrow.vector.complex.writer">Decimal32Writer</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="org.apache.arrow.vector/org/apache/arrow/vector/complex/impl/Decimal32WriterImpl.html" title="class in org.apache.arrow.vector.complex.impl">Decimal32WriterImpl</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="org.apache.arrow.adapter.jdbc/org/apache/arrow/adapter/jdbc/binder/Decimal64Binder.html" title="class in org.apache.arrow.adapter.jdbc.binder">Decimal64Binder</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="block">A binder for 64-bit decimals.</div>
+</div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="org.apache.arrow.adapter.jdbc/org/apache/arrow/adapter/jdbc/consumer/Decimal64Consumer.html" title="class in org.apache.arrow.adapter.jdbc.consumer">Decimal64Consumer</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Consumer which consume decimal type values from <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.sql/java/sql/ResultSet.html" title="class or interface in java.sql" class="external-link"><code>ResultSet</code></a>.</div>
