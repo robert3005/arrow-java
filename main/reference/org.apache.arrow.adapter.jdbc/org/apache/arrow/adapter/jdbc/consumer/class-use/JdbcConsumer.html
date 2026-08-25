@@ -134,6 +134,16 @@ loadScripts(document, 'script');</script>
 <div class="block">Consumer which consume decimal type values from <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.sql/java/sql/ResultSet.html" title="class or interface in java.sql" class="external-link"><code>ResultSet</code></a>.</div>
 </div>
 <div class="col-first odd-row-color"><code>class&nbsp;</code></div>
+<div class="col-second odd-row-color"><code><a href="../Decimal32Consumer.html" class="type-name-link" title="class in org.apache.arrow.adapter.jdbc.consumer">Decimal32Consumer</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Consumer which consume decimal type values from <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.sql/java/sql/ResultSet.html" title="class or interface in java.sql" class="external-link"><code>ResultSet</code></a>.</div>
+</div>
+<div class="col-first even-row-color"><code>class&nbsp;</code></div>
+<div class="col-second even-row-color"><code><a href="../Decimal64Consumer.html" class="type-name-link" title="class in org.apache.arrow.adapter.jdbc.consumer">Decimal64Consumer</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Consumer which consume decimal type values from <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.sql/java/sql/ResultSet.html" title="class or interface in java.sql" class="external-link"><code>ResultSet</code></a>.</div>
+</div>
+<div class="col-first odd-row-color"><code>class&nbsp;</code></div>
 <div class="col-second odd-row-color"><code><a href="../DecimalConsumer.html" class="type-name-link" title="class in org.apache.arrow.adapter.jdbc.consumer">DecimalConsumer</a></code></div>
 <div class="col-last odd-row-color">
 <div class="block">Consumer which consume decimal type values from <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.sql/java/sql/ResultSet.html" title="class or interface in java.sql" class="external-link"><code>ResultSet</code></a>.</div>
@@ -192,6 +202,22 @@ loadScripts(document, 'script');</script>
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/RoundingMode.html" title="class or interface in java.math" class="external-link">RoundingMode</a>&nbsp;bigDecimalRoundingMode)</code></div>
 <div class="col-last odd-row-color">
 <div class="block">Creates a consumer for <a href="../../../../../../../../org.apache.arrow.vector/org/apache/arrow/vector/Decimal256Vector.html" title="class in org.apache.arrow.vector"><code>Decimal256Vector</code></a>.</div>
+</div>
+<div class="col-first even-row-color"><code>static <a href="../JdbcConsumer.html" title="interface in org.apache.arrow.adapter.jdbc.consumer">JdbcConsumer</a>&lt;<a href="../../../../../../../../org.apache.arrow.vector/org/apache/arrow/vector/Decimal32Vector.html" title="class in org.apache.arrow.vector">Decimal32Vector</a>&gt;</code></div>
+<div class="col-second even-row-color"><span class="type-name-label">Decimal32Consumer.</span><code><a href="../Decimal32Consumer.html#createConsumer(org.apache.arrow.vector.Decimal32Vector,int,boolean,java.math.RoundingMode)" class="member-name-link">createConsumer</a><wbr>(<a href="../../../../../../../../org.apache.arrow.vector/org/apache/arrow/vector/Decimal32Vector.html" title="class in org.apache.arrow.vector">Decimal32Vector</a>&nbsp;vector,
+ int&nbsp;index,
+ boolean&nbsp;nullable,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/RoundingMode.html" title="class or interface in java.math" class="external-link">RoundingMode</a>&nbsp;bigDecimalRoundingMode)</code></div>
+<div class="col-last even-row-color">
+<div class="block">Creates a consumer for <a href="../../../../../../../../org.apache.arrow.vector/org/apache/arrow/vector/Decimal32Vector.html" title="class in org.apache.arrow.vector"><code>Decimal32Vector</code></a>.</div>
+</div>
+<div class="col-first odd-row-color"><code>static <a href="../JdbcConsumer.html" title="interface in org.apache.arrow.adapter.jdbc.consumer">JdbcConsumer</a>&lt;<a href="../../../../../../../../org.apache.arrow.vector/org/apache/arrow/vector/Decimal64Vector.html" title="class in org.apache.arrow.vector">Decimal64Vector</a>&gt;</code></div>
+<div class="col-second odd-row-color"><span class="type-name-label">Decimal64Consumer.</span><code><a href="../Decimal64Consumer.html#createConsumer(org.apache.arrow.vector.Decimal64Vector,int,boolean,java.math.RoundingMode)" class="member-name-link">createConsumer</a><wbr>(<a href="../../../../../../../../org.apache.arrow.vector/org/apache/arrow/vector/Decimal64Vector.html" title="class in org.apache.arrow.vector">Decimal64Vector</a>&nbsp;vector,
+ int&nbsp;index,
+ boolean&nbsp;nullable,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/RoundingMode.html" title="class or interface in java.math" class="external-link">RoundingMode</a>&nbsp;bigDecimalRoundingMode)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Creates a consumer for <a href="../../../../../../../../org.apache.arrow.vector/org/apache/arrow/vector/Decimal64Vector.html" title="class in org.apache.arrow.vector"><code>Decimal64Vector</code></a>.</div>
 </div>
 <div class="col-first even-row-color"><code>static <a href="../JdbcConsumer.html" title="interface in org.apache.arrow.adapter.jdbc.consumer">JdbcConsumer</a>&lt;<a href="../../../../../../../../org.apache.arrow.vector/org/apache/arrow/vector/DecimalVector.html" title="class in org.apache.arrow.vector">DecimalVector</a>&gt;</code></div>
 <div class="col-second even-row-color"><span class="type-name-label">DecimalConsumer.</span><code><a href="../DecimalConsumer.html#createConsumer(org.apache.arrow.vector.DecimalVector,int,boolean,java.math.RoundingMode)" class="member-name-link">createConsumer</a><wbr>(<a href="../../../../../../../../org.apache.arrow.vector/org/apache/arrow/vector/DecimalVector.html" title="class in org.apache.arrow.vector">DecimalVector</a>&nbsp;vector,
