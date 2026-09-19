@@ -186,13 +186,12 @@ public class TestDecimal32Vector {
         assertEquals(new BigDecimal(longValues[i]), decimalVector.getObject(i));
       }
 
-      assertThrows(UnsupportedOperationException.class, () -> decimalVector.set(0, Long.MAX_VALUE));
+      assertThrows(IllegalArgumentException.class, () -> decimalVector.set(0, Long.MAX_VALUE));
 
       // a failed overflowing set must not mark the slot valid
       final int overflowIdx = longValues.length;
       assertThrows(
-          UnsupportedOperationException.class,
-          () -> decimalVector.set(overflowIdx, Long.MAX_VALUE));
+          IllegalArgumentException.class, () -> decimalVector.set(overflowIdx, Long.MAX_VALUE));
       decimalVector.setValueCount(overflowIdx + 1);
       assertTrue(decimalVector.isNull(overflowIdx));
     }

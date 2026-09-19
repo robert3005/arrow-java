@@ -180,8 +180,7 @@ public class DecimalUtility {
     final long addressOfValue = bytebuf.memoryAddress() + startIndex;
     if (byteWidth == 4) {
       if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
-        throw new UnsupportedOperationException(
-            "Decimal value does not fit in 32-bit width: " + value);
+        throw new IllegalArgumentException("Decimal value does not fit in 32-bit width: " + value);
       }
       MemoryUtil.putInt(addressOfValue, (int) value);
       return;
