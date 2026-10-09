@@ -58,6 +58,8 @@ import org.apache.arrow.vector.BigIntVector;
 import org.apache.arrow.vector.BitVectorHelper;
 import org.apache.arrow.vector.BufferLayout.BufferType;
 import org.apache.arrow.vector.Decimal256Vector;
+import org.apache.arrow.vector.Decimal32Vector;
+import org.apache.arrow.vector.Decimal64Vector;
 import org.apache.arrow.vector.DecimalVector;
 import org.apache.arrow.vector.FieldVector;
 import org.apache.arrow.vector.Float4Vector;
@@ -597,6 +599,10 @@ public class JsonFileReader implements AutoCloseable, DictionaryProvider {
           }
         };
 
+    BufferReader DECIMAL32 = decimalReader(Decimal32Vector.TYPE_WIDTH);
+
+    BufferReader DECIMAL64 = decimalReader(Decimal64Vector.TYPE_WIDTH);
+
     BufferReader DECIMAL = decimalReader(DecimalVector.TYPE_WIDTH);
 
     BufferReader DECIMAL256 = decimalReader(Decimal256Vector.TYPE_WIDTH);
@@ -762,6 +768,12 @@ public class JsonFileReader implements AutoCloseable, DictionaryProvider {
           break;
         case FLOAT8:
           reader = helper.FLOAT8;
+          break;
+        case DECIMAL32:
+          reader = helper.DECIMAL32;
+          break;
+        case DECIMAL64:
+          reader = helper.DECIMAL64;
           break;
         case DECIMAL:
           reader = helper.DECIMAL;
