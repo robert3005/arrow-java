@@ -597,43 +597,32 @@ public class JsonFileReader implements AutoCloseable, DictionaryProvider {
           }
         };
 
-    BufferReader DECIMAL =
-        new BufferReader() {
-          @Override
-          protected ArrowBuf read(BufferAllocator allocator, int count) throws IOException {
-            final long size = (long) count * DecimalVector.TYPE_WIDTH;
-            ArrowBuf buf = allocator.buffer(size);
+    BufferReader DECIMAL = decimalReader(DecimalVector.TYPE_WIDTH);
 
+    BufferReader DECIMAL256 = decimalReader(Decimal256Vector.TYPE_WIDTH);
+
+    private BufferReader decimalReader(int typeWidth) {
+      return new BufferReader() {
+        @Override
+        protected ArrowBuf read(BufferAllocator allocator, int count) throws IOException {
+          final long size = (long) count * typeWidth;
+          ArrowBuf buf = allocator.buffer(size);
+          try {
             for (int i = 0; i < count; i++) {
               parser.nextToken();
               BigDecimal decimalValue = new BigDecimal(parser.readValueAs(String.class));
-              DecimalUtility.writeBigDecimalToArrowBuf(
-                  decimalValue, buf, i, DecimalVector.TYPE_WIDTH);
+              DecimalUtility.writeBigDecimalToArrowBuf(decimalValue, buf, i, typeWidth);
             }
-
-            buf.writerIndex(size);
-            return buf;
+          } catch (Exception e) {
+            buf.close();
+            throw e;
           }
-        };
 
-    BufferReader DECIMAL256 =
-        new BufferReader() {
-          @Override
-          protected ArrowBuf read(BufferAllocator allocator, int count) throws IOException {
-            final long size = (long) count * Decimal256Vector.TYPE_WIDTH;
-            ArrowBuf buf = allocator.buffer(size);
-
-            for (int i = 0; i < count; i++) {
-              parser.nextToken();
-              BigDecimal decimalValue = new BigDecimal(parser.readValueAs(String.class));
-              DecimalUtility.writeBigDecimalToArrowBuf(
-                  decimalValue, buf, i, Decimal256Vector.TYPE_WIDTH);
-            }
-
-            buf.writerIndex(size);
-            return buf;
-          }
-        };
+          buf.writerIndex(size);
+          return buf;
+        }
+      };
+    }
 
     ArrowBuf readBinaryValues(BufferAllocator allocator, int count) throws IOException {
       ArrayList<byte[]> values = new ArrayList<>(count);
@@ -873,80 +862,83 @@ public class JsonFileReader implements AutoCloseable, DictionaryProvider {
      * locally as we read from Json parser and do loadFieldBuffers on the vector followed by
      * releasing the local buffers.
      */
-    readToken(START_OBJECT);
-    {
-      // If currently reading dictionaries, field name is not important so don't check
-      String name = readNextField("name", String.class);
-      if (started && !Objects.equals(field.getName(), name)) {
-        throw new IllegalArgumentException(
-            "Expected field " + field.getName() + " but got " + name);
-      }
-
-      /* Initialize the vector with required capacity but don't allocateNew since we would
-       * be doing loadFieldBuffers.
-       */
-      int valueCount = readNextField("count", Integer.class);
-
-      vector.setInitialCapacity(valueCount);
-
-      for (int v = 0; v < vectorTypes.size(); v++) {
-        BufferType bufferType = vectorTypes.get(v);
-        nextFieldIs(bufferType.getName());
-        int innerBufferValueCount = valueCount;
-        if (bufferType.equals(OFFSET)
-            && !(type instanceof Union)
-            && !(type instanceof ListView)
-            && !(type instanceof LargeListView)) {
-          /* offset buffer has 1 additional value capacity except for dense unions and ListView */
-          innerBufferValueCount = valueCount + 1;
-        }
-
-        vectorBuffers.addAll(
-            readIntoBuffer(
-                allocator,
-                bufferType,
-                vector.getMinorType(),
-                innerBufferValueCount,
-                variadicBufferIndices));
-      }
-
-      int nullCount;
-      if (type instanceof ArrowType.RunEndEncoded || type instanceof Union) {
-        nullCount = 0;
-      } else if (type instanceof ArrowType.Null) {
-        nullCount = valueCount;
-      } else {
-        nullCount = BitVectorHelper.getNullCount(vectorBuffers.get(0), valueCount);
-      }
-      final ArrowFieldNode fieldNode = new ArrowFieldNode(valueCount, nullCount);
-      vector.loadFieldBuffers(fieldNode, vectorBuffers);
-
-      /* read child vectors (if any) */
-      List<Field> fields = field.getChildren();
-      if (!fields.isEmpty()) {
-        List<FieldVector> vectorChildren = vector.getChildrenFromFields();
-        if (fields.size() != vectorChildren.size()) {
+    try {
+      readToken(START_OBJECT);
+      {
+        // If currently reading dictionaries, field name is not important so don't check
+        String name = readNextField("name", String.class);
+        if (started && !Objects.equals(field.getName(), name)) {
           throw new IllegalArgumentException(
-              "fields and children are not the same size: "
-                  + fields.size()
-                  + " != "
-                  + vectorChildren.size());
+              "Expected field " + field.getName() + " but got " + name);
         }
-        nextFieldIs("children");
-        readToken(START_ARRAY);
-        for (int i = 0; i < fields.size(); i++) {
-          Field childField = fields.get(i);
-          FieldVector childVector = vectorChildren.get(i);
-          readFromJsonIntoVector(childField, childVector);
+
+        /* Initialize the vector with required capacity but don't allocateNew since we would
+         * be doing loadFieldBuffers.
+         */
+        int valueCount = readNextField("count", Integer.class);
+
+        vector.setInitialCapacity(valueCount);
+
+        for (int v = 0; v < vectorTypes.size(); v++) {
+          BufferType bufferType = vectorTypes.get(v);
+          nextFieldIs(bufferType.getName());
+          int innerBufferValueCount = valueCount;
+          if (bufferType.equals(OFFSET)
+              && !(type instanceof Union)
+              && !(type instanceof ListView)
+              && !(type instanceof LargeListView)) {
+            /* offset buffer has 1 additional value capacity except for dense unions and ListView */
+            innerBufferValueCount = valueCount + 1;
+          }
+
+          vectorBuffers.addAll(
+              readIntoBuffer(
+                  allocator,
+                  bufferType,
+                  vector.getMinorType(),
+                  innerBufferValueCount,
+                  variadicBufferIndices));
         }
-        readToken(END_ARRAY);
+
+        int nullCount;
+        if (type instanceof ArrowType.RunEndEncoded || type instanceof Union) {
+          nullCount = 0;
+        } else if (type instanceof ArrowType.Null) {
+          nullCount = valueCount;
+        } else {
+          nullCount = BitVectorHelper.getNullCount(vectorBuffers.get(0), valueCount);
+        }
+        final ArrowFieldNode fieldNode = new ArrowFieldNode(valueCount, nullCount);
+        vector.loadFieldBuffers(fieldNode, vectorBuffers);
+
+        /* read child vectors (if any) */
+        List<Field> fields = field.getChildren();
+        if (!fields.isEmpty()) {
+          List<FieldVector> vectorChildren = vector.getChildrenFromFields();
+          if (fields.size() != vectorChildren.size()) {
+            throw new IllegalArgumentException(
+                "fields and children are not the same size: "
+                    + fields.size()
+                    + " != "
+                    + vectorChildren.size());
+          }
+          nextFieldIs("children");
+          readToken(START_ARRAY);
+          for (int i = 0; i < fields.size(); i++) {
+            Field childField = fields.get(i);
+            FieldVector childVector = vectorChildren.get(i);
+            readFromJsonIntoVector(childField, childVector);
+          }
+          readToken(END_ARRAY);
+        }
       }
-    }
 
-    readToken(END_OBJECT);
+      readToken(END_OBJECT);
 
-    for (ArrowBuf buffer : vectorBuffers) {
-      buffer.getReferenceManager().release();
+    } finally {
+      for (ArrowBuf buffer : vectorBuffers) {
+        buffer.close();
+      }
     }
   }
 
