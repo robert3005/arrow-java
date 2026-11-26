@@ -28,6 +28,7 @@ import org.apache.arrow.vector.DateDayVector;
 import org.apache.arrow.vector.DateMilliVector;
 import org.apache.arrow.vector.Decimal256Vector;
 import org.apache.arrow.vector.Decimal32Vector;
+import org.apache.arrow.vector.Decimal64Vector;
 import org.apache.arrow.vector.DecimalVector;
 import org.apache.arrow.vector.DurationVector;
 import org.apache.arrow.vector.ExtensionTypeVector;
@@ -170,6 +171,17 @@ public class ValidateVectorTypeVisitor implements VectorVisitor<Void, Void> {
             "Invalid precision %s for decimal 32.",
             decimalType.getPrecision());
         break;
+      case Decimal64Vector.TYPE_WIDTH * 8:
+        validateOrThrow(
+            vector instanceof Decimal64Vector,
+            "Expected Decimal64Vector for decimal 64, actual %s.",
+            vector.getClass());
+        validateOrThrow(
+            decimalType.getPrecision() >= 1
+                && decimalType.getPrecision() <= Decimal64Vector.MAX_PRECISION,
+            "Invalid precision %s for decimal 64.",
+            decimalType.getPrecision());
+        break;
       case DecimalVector.TYPE_WIDTH * 8:
         validateOrThrow(
             vector instanceof DecimalVector,
@@ -194,7 +206,7 @@ public class ValidateVectorTypeVisitor implements VectorVisitor<Void, Void> {
         break;
       default:
         throw new ValidateUtil.ValidateException(
-            "Only decimal 32, decimal 128 or decimal 256 are supported for decimal"
+            "Only decimal 32, decimal 64, decimal 128 or decimal 256 are supported for decimal"
                 + " types");
     }
   }
@@ -298,6 +310,7 @@ public class ValidateVectorTypeVisitor implements VectorVisitor<Void, Void> {
     } else if (vector instanceof BitVector) {
       validateVectorCommon(vector, ArrowType.Bool.class);
     } else if (vector instanceof Decimal32Vector
+        || vector instanceof Decimal64Vector
         || vector instanceof DecimalVector
         || vector instanceof Decimal256Vector) {
       validateVectorCommon(vector, ArrowType.Decimal.class);

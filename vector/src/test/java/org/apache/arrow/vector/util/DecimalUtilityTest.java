@@ -30,7 +30,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 public class DecimalUtilityTest {
   @ParameterizedTest
-  @ValueSource(ints = {4})
+  @ValueSource(ints = {4, 8})
   public void testWriteLongChecksBufferBounds(int byteWidth) {
     try (BufferAllocator allocator = new RootAllocator(128);
         ArrowBuf buffer = allocator.buffer(3L * byteWidth)) {

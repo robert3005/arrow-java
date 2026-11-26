@@ -167,13 +167,13 @@ public class DecimalUtility {
 
   /**
    * Write the given long to the ArrowBuf at the given value index. This routine extends the
-   * original sign bit to a new upper area in 128-bit or 256-bit.
+   * original sign bit to a new upper area in 64-bit, 128-bit or 256-bit.
    */
   public static void writeLongToArrowBuf(long value, ArrowBuf bytebuf, int index, int byteWidth) {
-    if (byteWidth != 4 && byteWidth != 16 && byteWidth != 32) {
+    if (byteWidth != 4 && byteWidth != 8 && byteWidth != 16 && byteWidth != 32) {
       throw new UnsupportedOperationException(
           "DecimalUtility.writeLongToArrowBuf() currently supports "
-              + "32-bit, 128-bit or 256-bit width data");
+              + "32-bit, 64-bit, 128-bit or 256-bit width data");
     }
     final long startIndex = (long) index * byteWidth;
     bytebuf.checkBytes(startIndex, startIndex + byteWidth);
