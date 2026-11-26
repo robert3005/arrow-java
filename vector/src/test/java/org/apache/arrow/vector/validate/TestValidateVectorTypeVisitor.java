@@ -27,6 +27,7 @@ import org.apache.arrow.vector.DateDayVector;
 import org.apache.arrow.vector.DateMilliVector;
 import org.apache.arrow.vector.Decimal256Vector;
 import org.apache.arrow.vector.Decimal32Vector;
+import org.apache.arrow.vector.Decimal64Vector;
 import org.apache.arrow.vector.DecimalVector;
 import org.apache.arrow.vector.DurationVector;
 import org.apache.arrow.vector.FixedSizeBinaryVector;
@@ -290,6 +291,10 @@ public class TestValidateVectorTypeVisitor {
                 "dec", FieldType.nullable(ArrowType.Decimal.createDecimal(9, 2, 32)), allocator));
     testPositiveCase(
         () ->
+            new Decimal64Vector(
+                "dec", FieldType.nullable(ArrowType.Decimal.createDecimal(18, 2, 64)), allocator));
+    testPositiveCase(
+        () ->
             new Decimal256Vector(
                 "dec",
                 FieldType.nullable(ArrowType.Decimal.createDecimal(50, 10, 256)),
@@ -330,6 +335,10 @@ public class TestValidateVectorTypeVisitor {
         () ->
             new DecimalVector(
                 "dec", FieldType.nullable(ArrowType.Decimal.createDecimal(9, 2, 32)), allocator));
+    testNegativeCase(
+        () ->
+            new Decimal64Vector(
+                "dec", FieldType.nullable(ArrowType.Decimal.createDecimal(18, 2, 128)), allocator));
     testNegativeCase(
         () ->
             new Decimal256Vector(
