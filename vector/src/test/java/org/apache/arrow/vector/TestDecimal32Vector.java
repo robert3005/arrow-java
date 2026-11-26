@@ -27,6 +27,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.channels.Channels;
 import java.util.Collections;
+import org.apache.arrow.memory.ArrowBuf;
 import org.apache.arrow.memory.BufferAllocator;
 import org.apache.arrow.vector.complex.impl.Decimal32HolderReaderImpl;
 import org.apache.arrow.vector.complex.impl.NullableDecimal32HolderReaderImpl;
@@ -315,6 +316,35 @@ public class TestDecimal32Vector {
     }
   }
 
+  @Test
+  public void setUsingArrowBufOfLEInts() {
+    try (Decimal32Vector decimalVector =
+            TestUtils.newVector(
+                Decimal32Vector.class, "decimal", new ArrowType.Decimal(5, 2, 32), allocator);
+        ArrowBuf buf = allocator.buffer(8)) {
+      decimalVector.allocateNew();
+
+      // add a positive value equivalent to 705.32
+      int val = 70532;
+      buf.setInt(0, val);
+      decimalVector.setSafe(0, 0, buf, 4);
+
+      // add a -ve value equivalent to -705.32
+      val = -70532;
+      buf.setInt(4, val);
+      decimalVector.setSafe(1, 4, buf, 4);
+
+      decimalVector.setValueCount(2);
+
+      BigDecimal[] expectedValues =
+          new BigDecimal[] {BigDecimal.valueOf(705.32), BigDecimal.valueOf(-705.32)};
+      for (int i = 0; i < 2; i++) {
+        BigDecimal value = decimalVector.getObject(i);
+        assertEquals(expectedValues[i], value);
+      }
+    }
+  }
+
   /** Round-trip a Decimal32 vector through the Arrow IPC stream format. */
   @Test
   public void testIpcRoundtrip() throws Exception {
@@ -394,6 +424,36 @@ public class TestDecimal32Vector {
       decimalVector.set(0, new BigDecimal("999.99")); // precision 5 == vector precision
       decimalVector.setValueCount(1);
       decimalVector.validateScalars(); // must not throw
+    }
+  }
+
+  @Test
+  public void testSetSafeRejectsTooLongLength() {
+    // Regression: setSafe/setBigEndianSafe with length > TYPE_WIDTH used to write past the slot
+    // before any validation, silently corrupting neighbouring values. They must now reject the
+    // length up front without mutating the vector.
+    try (Decimal32Vector decimalVector =
+            TestUtils.newVector(
+                Decimal32Vector.class, "decimal", new ArrowType.Decimal(9, 0, 32), allocator);
+        ArrowBuf buf = allocator.buffer(16)) {
+      decimalVector.allocateNew(2);
+      decimalVector.set(1, 123L); // neighbour that must remain intact
+      buf.setLong(0, 0x0102030405060708L);
+
+      final int tooLong = Decimal32Vector.TYPE_WIDTH + 1;
+      assertThrows(IllegalArgumentException.class, () -> decimalVector.setSafe(0, 0, buf, tooLong));
+      assertThrows(
+          IllegalArgumentException.class, () -> decimalVector.setBigEndianSafe(0, 0, buf, tooLong));
+      assertThrows(IllegalArgumentException.class, () -> decimalVector.setSafe(0, 0, buf, 0));
+      assertThrows(
+          IllegalArgumentException.class, () -> decimalVector.setBigEndianSafe(0, 0, buf, 0));
+      assertThrows(IllegalArgumentException.class, () -> decimalVector.setSafe(0, 0, buf, -1));
+      assertThrows(
+          IllegalArgumentException.class, () -> decimalVector.setBigEndianSafe(0, 0, buf, -1));
+
+      decimalVector.setValueCount(2);
+      assertTrue(decimalVector.isNull(0)); // rejected write left index 0 untouched
+      assertEquals(new BigDecimal(123), decimalVector.getObject(1));
     }
   }
 }

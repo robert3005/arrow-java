@@ -48,6 +48,13 @@ public final class Decimal32Vector extends BaseFixedWidthVector
   private final int precision;
   private final int scale;
 
+  private static void checkByteLength(int length) {
+    if (length < 1 || length > TYPE_WIDTH) {
+      throw new IllegalArgumentException(
+          "Invalid decimal value length. Valid length in [1 - " + TYPE_WIDTH + "], got " + length);
+    }
+  }
+
   /**
    * Instantiate a Decimal32Vector. This doesn't allocate any memory for the data in vector.
    *
@@ -250,6 +257,87 @@ public final class Decimal32Vector extends BaseFixedWidthVector
   public void set(int index, long start, ArrowBuf buffer) {
     BitVectorHelper.setBit(validityBuffer, index);
     valueBuffer.setBytes((long) index * TYPE_WIDTH, buffer, start, TYPE_WIDTH);
+  }
+
+  /**
+   * Sets the element at given index using the buffer whose size maybe <= 4 bytes.
+   *
+   * @param index index to write the decimal to
+   * @param start start of value in the buffer
+   * @param buffer contains the decimal in native endian bytes
+   * @param length length of the value in the buffer
+   */
+  public void setSafe(int index, long start, ArrowBuf buffer, int length) {
+    checkByteLength(length);
+    handleSafe(index);
+    BitVectorHelper.setBit(validityBuffer, index);
+
+    // do the bound checks.
+    buffer.checkBytes(start, start + length);
+    valueBuffer.checkBytes((long) index * TYPE_WIDTH, (long) (index + 1) * TYPE_WIDTH);
+
+    long inAddress = buffer.memoryAddress() + start;
+    long outAddress = valueBuffer.memoryAddress() + (long) index * TYPE_WIDTH;
+    if (LITTLE_ENDIAN) {
+      MemoryUtil.copyMemory(inAddress, outAddress, length);
+      // sign extend
+      if (length < TYPE_WIDTH) {
+        byte msb = MemoryUtil.getByte(inAddress + length - 1);
+        final byte pad = (byte) (msb < 0 ? 0xFF : 0x00);
+        MemoryUtil.setMemory(outAddress + length, Decimal32Vector.TYPE_WIDTH - length, pad);
+      }
+    } else {
+      MemoryUtil.copyMemory(inAddress, outAddress + Decimal32Vector.TYPE_WIDTH - length, length);
+      // sign extend
+      if (length < TYPE_WIDTH) {
+        byte msb = MemoryUtil.getByte(inAddress);
+        final byte pad = (byte) (msb < 0 ? 0xFF : 0x00);
+        MemoryUtil.setMemory(outAddress, Decimal32Vector.TYPE_WIDTH - length, pad);
+      }
+    }
+  }
+
+  /**
+   * Sets the element at given index using the buffer whose size maybe <= 4 bytes.
+   *
+   * @param index index to write the decimal to
+   * @param start start of value in the buffer
+   * @param buffer contains the decimal in big endian bytes
+   * @param length length of the value in the buffer
+   */
+  public void setBigEndianSafe(int index, long start, ArrowBuf buffer, int length) {
+    checkByteLength(length);
+    handleSafe(index);
+    BitVectorHelper.setBit(validityBuffer, index);
+
+    // do the bound checks.
+    buffer.checkBytes(start, start + length);
+    valueBuffer.checkBytes((long) index * TYPE_WIDTH, (long) (index + 1) * TYPE_WIDTH);
+
+    // not using buffer.getByte() to avoid boundary checks for every byte.
+    long inAddress = buffer.memoryAddress() + start;
+    long outAddress = valueBuffer.memoryAddress() + (long) index * TYPE_WIDTH;
+    if (LITTLE_ENDIAN) {
+      // swap bytes to convert BE to LE
+      for (int byteIdx = 0; byteIdx < length; ++byteIdx) {
+        byte val = MemoryUtil.getByte((inAddress + length - 1) - byteIdx);
+        MemoryUtil.putByte(outAddress + byteIdx, val);
+      }
+      // sign extend
+      if (length < TYPE_WIDTH) {
+        byte msb = MemoryUtil.getByte(inAddress);
+        final byte pad = (byte) (msb < 0 ? 0xFF : 0x00);
+        MemoryUtil.setMemory(outAddress + length, Decimal32Vector.TYPE_WIDTH - length, pad);
+      }
+    } else {
+      MemoryUtil.copyMemory(inAddress, outAddress + Decimal32Vector.TYPE_WIDTH - length, length);
+      // sign extend
+      if (length < TYPE_WIDTH) {
+        byte msb = MemoryUtil.getByte(inAddress);
+        final byte pad = (byte) (msb < 0 ? 0xFF : 0x00);
+        MemoryUtil.setMemory(outAddress, Decimal32Vector.TYPE_WIDTH - length, pad);
+      }
+    }
   }
 
   /**

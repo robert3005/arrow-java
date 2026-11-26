@@ -27,6 +27,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.channels.Channels;
 import java.util.Collections;
+import org.apache.arrow.memory.ArrowBuf;
 import org.apache.arrow.memory.BufferAllocator;
 import org.apache.arrow.vector.complex.impl.Decimal64HolderReaderImpl;
 import org.apache.arrow.vector.complex.impl.NullableDecimal64HolderReaderImpl;
@@ -321,6 +322,33 @@ public class TestDecimal64Vector {
     }
   }
 
+  @Test
+  public void setUsingArrowLongLEBytes() {
+    try (Decimal64Vector decimalVector =
+            TestUtils.newVector(
+                Decimal64Vector.class, "decimal", new ArrowType.Decimal(18, 0, 64), allocator);
+        ArrowBuf buf = allocator.buffer(16)) {
+      decimalVector.allocateNew();
+
+      long val = Long.MAX_VALUE;
+      buf.setLong(0, val);
+      decimalVector.setSafe(0, 0, buf, 8);
+
+      val = Long.MIN_VALUE;
+      buf.setLong(8, val);
+      decimalVector.setSafe(1, 8, buf, 8);
+
+      decimalVector.setValueCount(2);
+
+      BigDecimal[] expectedValues =
+          new BigDecimal[] {BigDecimal.valueOf(Long.MAX_VALUE), BigDecimal.valueOf(Long.MIN_VALUE)};
+      for (int i = 0; i < 2; i++) {
+        BigDecimal value = decimalVector.getObject(i);
+        assertEquals(expectedValues[i], value);
+      }
+    }
+  }
+
   /** Round-trip a Decimal64 vector through the Arrow IPC stream format. */
   @Test
   public void testIpcRoundtrip() throws Exception {
@@ -400,6 +428,36 @@ public class TestDecimal64Vector {
       decimalVector.set(0, new BigDecimal("9999999999999999.99")); // precision 18 == vector prec
       decimalVector.setValueCount(1);
       decimalVector.validateScalars(); // must not throw
+    }
+  }
+
+  @Test
+  public void testSetSafeRejectsTooLongLength() {
+    // Regression: setSafe/setBigEndianSafe with length > TYPE_WIDTH used to write past the slot
+    // before any validation, silently corrupting neighbouring values. They must now reject the
+    // length up front without mutating the vector.
+    try (Decimal64Vector decimalVector =
+            TestUtils.newVector(
+                Decimal64Vector.class, "decimal", new ArrowType.Decimal(18, 0, 64), allocator);
+        ArrowBuf buf = allocator.buffer(16)) {
+      decimalVector.allocateNew(2);
+      decimalVector.set(1, 123L); // neighbour that must remain intact
+      buf.setLong(0, 0x0102030405060708L);
+
+      final int tooLong = Decimal64Vector.TYPE_WIDTH + 1;
+      assertThrows(IllegalArgumentException.class, () -> decimalVector.setSafe(0, 0, buf, tooLong));
+      assertThrows(
+          IllegalArgumentException.class, () -> decimalVector.setBigEndianSafe(0, 0, buf, tooLong));
+      assertThrows(IllegalArgumentException.class, () -> decimalVector.setSafe(0, 0, buf, 0));
+      assertThrows(
+          IllegalArgumentException.class, () -> decimalVector.setBigEndianSafe(0, 0, buf, 0));
+      assertThrows(IllegalArgumentException.class, () -> decimalVector.setSafe(0, 0, buf, -1));
+      assertThrows(
+          IllegalArgumentException.class, () -> decimalVector.setBigEndianSafe(0, 0, buf, -1));
+
+      decimalVector.setValueCount(2);
+      assertTrue(decimalVector.isNull(0)); // rejected write left index 0 untouched
+      assertEquals(new BigDecimal(123), decimalVector.getObject(1));
     }
   }
 }
