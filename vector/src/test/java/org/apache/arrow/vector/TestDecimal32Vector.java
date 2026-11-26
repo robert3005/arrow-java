@@ -21,14 +21,23 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.channels.Channels;
+import java.util.Collections;
 import org.apache.arrow.memory.BufferAllocator;
 import org.apache.arrow.vector.complex.impl.Decimal32HolderReaderImpl;
 import org.apache.arrow.vector.complex.impl.NullableDecimal32HolderReaderImpl;
 import org.apache.arrow.vector.holders.Decimal32Holder;
 import org.apache.arrow.vector.holders.NullableDecimal32Holder;
+import org.apache.arrow.vector.ipc.ArrowStreamReader;
+import org.apache.arrow.vector.ipc.ArrowStreamWriter;
 import org.apache.arrow.vector.types.pojo.ArrowType;
+import org.apache.arrow.vector.types.pojo.Field;
+import org.apache.arrow.vector.types.pojo.FieldType;
+import org.apache.arrow.vector.types.pojo.Schema;
 import org.apache.arrow.vector.util.TransferPair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -303,6 +312,48 @@ public class TestDecimal32Vector {
       }
       assertTrue(decimalVector.isNull(outputIdx++));
       assertEquals(BigInteger.valueOf(0), decimalVector.getObject(outputIdx).unscaledValue());
+    }
+  }
+
+  /** Round-trip a Decimal32 vector through the Arrow IPC stream format. */
+  @Test
+  public void testIpcRoundtrip() throws Exception {
+    Field field = new Field("decimal", FieldType.nullable(new ArrowType.Decimal(9, 4, 32)), null);
+    Schema schema = new Schema(Collections.singletonList(field));
+    byte[] serialized;
+
+    try (VectorSchemaRoot root = VectorSchemaRoot.create(schema, allocator)) {
+      Decimal32Vector vector = (Decimal32Vector) root.getVector("decimal");
+      vector.allocateNew();
+      vector.set(0, new BigDecimal("12345.6789"));
+      vector.setNull(1);
+      vector.set(2, new BigDecimal("-9876.5432"));
+      root.setRowCount(3);
+
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      try (ArrowStreamWriter writer = new ArrowStreamWriter(root, null, Channels.newChannel(out))) {
+        writer.start();
+        writer.writeBatch();
+        writer.end();
+      }
+      serialized = out.toByteArray();
+    }
+
+    try (ArrowStreamReader reader =
+        new ArrowStreamReader(new ByteArrayInputStream(serialized), allocator)) {
+      VectorSchemaRoot readRoot = reader.getVectorSchemaRoot();
+      ArrowType.Decimal readType =
+          (ArrowType.Decimal) readRoot.getSchema().getFields().get(0).getType();
+      assertEquals(32, readType.getBitWidth());
+      assertEquals(9, readType.getPrecision());
+      assertEquals(4, readType.getScale());
+
+      assertTrue(reader.loadNextBatch());
+      Decimal32Vector vector = (Decimal32Vector) readRoot.getVector("decimal");
+      assertEquals(3, vector.getValueCount());
+      assertEquals(new BigDecimal("12345.6789"), vector.getObject(0));
+      assertTrue(vector.isNull(1));
+      assertEquals(new BigDecimal("-9876.5432"), vector.getObject(2));
     }
   }
 
